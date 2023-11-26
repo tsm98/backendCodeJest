@@ -1,0 +1,4 @@
+{
+    "mongoURI": "mongodb+srv://sairam_maddala:CrFK3miLwJKnYk57@cluster0.6o1vrwt.mongodb.net/UTCodeJest?retryWrites=true&w=majority",
+    "jwtSecret": "mysecrettoken"
+  }
