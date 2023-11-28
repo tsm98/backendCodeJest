@@ -6,6 +6,7 @@ const postSchema = new mongoose.Schema({
   tags: [String],
   file: String,
   userEmail: String,
+  likes: Number,
   comment: [
     {
       user: {

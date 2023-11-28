@@ -25,6 +25,7 @@ router.post(
         tags: req.body.postTags,
         file: req.body.file,
         userEmail: req.body.userEmail,
+        likes: 0,
       });
 
       const post = await newPost.save();
@@ -117,19 +118,19 @@ router.delete("/:id", async (req, res) => {
 // @route    PUT api/posts/like/:id
 // @desc     Like a post
 // @access   Private
-router.put("/like/:id", async (req, res) => {
+router.post("/like", async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const email = req.body.user.email;
+    let user = await User.findOne({ email });
+    console.log(user);
+    const post = await Post.findById(req.body.postId);
 
     // Check if the post has already been liked
-    if (
-      post.likes.filter((like) => like.user.toString() === req.user.id).length >
-      0
-    ) {
+    if (post.likes.filter((like) => like.user === user).length > 0) {
       return res.status(400).json({ msg: "Post already liked" });
     }
 
-    post.likes.unshift({ user: req.user.id });
+    post.likes.unshift({ user });
 
     await post.save();
 
