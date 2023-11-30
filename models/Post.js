@@ -5,12 +5,12 @@ const postSchema = new mongoose.Schema({
   description: String,
   tags: [String],
   file: String,
-  userEmail: String,
-  likes: Number,
+  user: {},
+  likes: [String],
   comment: [
     {
       user: {
-        type: String,
+        type: {},
       },
       text: {
         type: String,

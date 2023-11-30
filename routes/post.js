@@ -24,8 +24,8 @@ router.post(
         description: req.body.postDescription,
         tags: req.body.postTags,
         file: req.body.file,
-        userEmail: req.body.userEmail,
-        likes: 0,
+        user: req.body.user,
+        likes: [],
       });
 
       const post = await newPost.save();
@@ -60,8 +60,8 @@ router.post("/getAllPosts", async (req, res) => {
 
 router.post("/getUserPosts", async (req, res) => {
   try {
-    const userEmail = req.body.email;
-    const posts = await Post.find({ userEmail });
+    const user = req.body.user;
+    const posts = await Post.find({ user });
     if (!posts.isEmpty) {
       console.log(posts);
       res.json(posts);
@@ -122,16 +122,15 @@ router.post("/like", async (req, res) => {
   try {
     const email = req.body.user.email;
     let user = await User.findOne({ email });
-    console.log(user);
     const post = await Post.findById(req.body.postId);
 
     // Check if the post has already been liked
-    if (post.likes.filter((like) => like.user === user).length > 0) {
+    if (post.likes.filter((like) => like === user.email).length > 0) {
       return res.status(400).json({ msg: "Post already liked" });
     }
 
-    post.likes.unshift({ user });
-
+    post.likes.unshift(user.email);
+    console.log(post);
     await post.save();
 
     res.json(post.likes);
@@ -143,21 +142,20 @@ router.post("/like", async (req, res) => {
 //@route    PUT api/posts/unlike/:id
 //@desc     Unlike post
 //@access   Private
-router.put("/unlike/:id", async (req, res) => {
+router.post("/unlike", async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
+    const email = req.body.user.email;
+    let user = await User.findOne({ email });
+    console.log(user);
+    const post = await Post.findById(req.body.postId);
+
     if (!post) {
       return res.status(404).send("Post not found");
     }
-    if (
-      post.likes.filter((like) => like.user.toString() === req.user.id)
-        .length === 0
-    ) {
+    if (post.likes.filter((like) => like === user.email).length === 0) {
       return res.status(400).json({ msg: "Cant unlike post if not liked" });
     }
-    const removeIndex = post.likes
-      .map((like) => like.user.toString())
-      .indexOf(req.user.id);
+    const removeIndex = post.likes.map((like) => like).indexOf(user.email);
 
     post.likes.splice(removeIndex, 1);
     await post.save();
@@ -191,7 +189,7 @@ router.post(
         text: req.body.text,
         name: user.name,
         avatar: user.avatar,
-        user: user.id,
+        user: user,
         likes: 0,
       };
 
